@@ -1,361 +1,440 @@
-import React, { useMemo, useState } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
-import Svg, { Circle, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Dimensions,
+  Linking,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { WebView } from "react-native-webview";
 
-type DataPoint = {
-  id: string;
-  label?: string;
-  major?: boolean;
-  value?: string;
-  year?: string;
-  level?: number;
-  amountLabel?: string;
-  lastPayment?: boolean;
-  next?: number;
-  divideSa?: boolean;
-};
+const { width, height } = Dimensions.get("window");
 
-type TimelineChartProps = {
-  data?: DataPoint[];
-  height?: number;
-  marginHorizontal?: number;
-  color?: string;
-  dotFill?: string;
-  lang?: "th" | "en";
-};
+export default function Credit() {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
-export default function TimelineChart({
-  data,
-  height = 280,
-  marginHorizontal = 40,
-  color = "#2c8592",
-  dotFill = "#c9e04a",
-  lang = "th",
-}: TimelineChartProps) {
-  const { width: windowWidth } = useWindowDimensions();
-  const width = Math.min(980, windowWidth - 24);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const mockSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="225" style="overflow: visible;">
+  <defs>
+    <marker id="Triangle" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto" border="1">
+      <path d="M 0 0 L 10 5 L 0 10 z">
+      </path>
+    </marker>
+    <marker id="TriangleStart" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto" border="1">
+      <path d="M -2 5 L 8 0 L 8 10 z">
+      </path>
+    </marker>
+    <marker id="TriangleSmall" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto" border="1">
+      <path d="M 0 0 L 10 5 L 0 10 z">
+      </path>
+    </marker>
+    <marker id="TriangleStartSmall" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto" border="1">
+      <path d="M -2 5 L 8 0 L 8 10 z">
+      </path>
+    </marker>
+  </defs>
+  <svg width="680" height="100" x="90" y="0" style="overflow: visible;">
+    <rect width="360" height="100" x="160" y="0" style="fill: none;"/>
+    <text id="header02TST1" class="wrap" x="340" y="0" font-family="Tahoma" font-size="11" style="text-anchor: middle;">
+      <tspan x="340" dy="1.2em" text-anchor="middle">
+        <tspan style="font-weight: bold">กรณีทดสอบระบบ:</tspan>
+        <tspan> ทดสอบระบบงับ </tspan>
+      </tspan>
+      <tspan x="340" dy="1.2em" text-anchor="middle">
+        <tspan style="font-weight: bold; text-decoration: underline">ทดสอบระบบงับ</tspan>
+        <tspan style="font-weight: bold">ทดสอบระบบงับทดสอบระบบงับทดสอบระบบงับทดสอบระบบงับ</tspan>
+        <tspan> ทดสอบระบบงับ</tspan>
+      </tspan>
+      <tspan x="340" dy="1.2em" text-anchor="middle">
+        <tspan>(ทดสอบระบบงับ)</tspan>
+      </tspan>
+    </text>
+    <path d="M130,20.7L0,20.7" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)"/>
+    <path d="M550,20.7L680,20.7" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)"/>
+  </svg>
+  <svg width="300" height="240" x="90" y="130" style="overflow: visible;">
+    <circle cx="0" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="126" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="252" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="302" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="428" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="554" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <circle cx="680" cy="0" stroke="#c9db30" r="5" style="fill: rgb(201, 219, 48);">
+    </circle>
+    <path d="M 0 0 L 0 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 126 0 L 126 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 252 0 L 252 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 302 0 L 302 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 428 0 L 428 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 554 0 L 554 -35" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 680 0 L 680 -45" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <path d="M 0 0 L 126 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <path d="M 126 0 L 252 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <path d="M 252 0 L 267 0 L 272 -10 L 282 10 L 287 0 L 302 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <path d="M 302 0 L 428 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <path d="M 428 0 L 554 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <path d="M 554 0 L 680 0" stroke="#008fa1" stroke-width="2" fill="none">
+    </path>
+    <text x="0" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="126" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="252" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="302" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="428" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="554" y="-45" font-family="Tahoma" font-size="8" style="text-anchor: middle;">50,000</text>
+    <text x="680" y="-55" font-family="Tahoma" font-size="8" style="text-anchor: middle;">55,000</text>
+    <text x="0" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">1</text>
+    <text x="126" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">2</text>
+    <text x="252" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">3</text>
+    <text x="302" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">7</text>
+    <text x="428" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">8</text>
+    <text x="554" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">9</text>
+    <text x="680" y="15" font-family="Tahoma" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">10</text>
+    <path d="M126,25L126,45" stroke="#008fa1" stroke-width="2" marker-end="url(#Triangle)">
+    </path>
+    <text x="126" y="75" font-family="Tahoma" font-size="10" style="text-anchor: middle;">ชำระเบี้ยครบ</text>
+  </svg>
+  <text x="0" y="134" font-family="Tahoma" font-size="12">สิ้นปีกรมธรรม์ที่</text>
+</svg>`
 
-  // Mockup data based on the original code
-  const defaultData: DataPoint[] = useMemo(
-    () => [
-      { id: "1", label: "1", year: "1", next: 1 },
-      { id: "2", label: "2", year: "2", next: 1 },
-      { id: "5", label: "5", year: "5", next: 1 },
-      { id: "10", label: "10", year: "10", next: 1 },
-      { id: "15", label: "15", year: "15", next: 1 },
-      { id: "20", label: "20", year: "20", next: 1 },
-      { id: "60", major: true, year: "A60", next: 1 },
-      { id: "70", major: true, year: "A70", next: 1 },
-      { id: "80", major: true, year: "A80", next: 1 },
-      { id: "90", major: true, value: "150,000", year: "A90", next: 1, lastPayment: true },
-    ],
-    []
-  );
+  useEffect(() => {
+    // Entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-  const pointsData = data && data.length ? data : defaultData;
+    // Continuous rotation animation for the star
+    Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 3000,
+        useNativeDriver: true,
+      })
+    ).start();
 
-  // Text content based on language
-  const textContent = {
-    xAxisLabel: { th: "สิ้นปีกรมธรรม์ที่", en: "End of Year" }[lang],
-    premiumEnd: { th: "ชำระเบี้ยครบ", en: "Premium Payment Finished" }[lang],
-    atAge: { th: "ครบอายุ", en: "At age" }[lang],
-    coverage: {
-      th: "ความคุ้มครองชีวิต : จำนวนที่มากกว่าระหว่าง 100% ของทุนประกันภัย",
-      en: "Death coverage*"
-    }[lang],
-    or: {
-      th: "หรือ มูลค่าเวนคืนเงินสด หรือ เบี้ยประกันภัยสะสม",
-      en: "or Cash Value or Accumulated Premium"
-    }[lang],
+    // Pulse animation for the GitHub button
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleGitHubPress = async () => {
+    const url = "https://github.com/zermoser";
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      console.error("Failed to open URL:", error);
+    }
   };
 
-  const centerY = Math.round(height / 2 + 20);
-  const availableW = Math.max(200, width - marginHorizontal * 2);
-  const gap = availableW / Math.max(1, pointsData.length - 1);
-
-  const dotRadius = 8;
-  const strokeWidth = 3;
-  const fontSize = 14;
-  const smallFont = 12;
-
-  const points = pointsData.map((p, i) => ({
-    ...p,
-    x: marginHorizontal + gap * i,
-    y: centerY,
-    index: i,
-  }));
-
-  // Create pronounced zigzag path
-  const pathD = useMemo(() => {
-    if (!points.length) return "";
-    const baseY = centerY;
-    const maxAmplitude = Math.min(20, gap * 0.4); // สูงสุด zigzag
-    let d = `M ${points[0].x} ${baseY}`;
-
-    for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1];
-      const cur = points[i];
-      const x0 = prev.x;
-      const x1 = cur.x;
-      const segmentLength = x1 - x0;
-
-      if (i !== 4 && i !== 5 && i !== 7) {
-        d += ` L ${x1} ${baseY}`;
-        continue;
-      }
-
-      // ความยาวเส้นตรงเริ่มและจบของ segment เท่ากัน
-      const straightLength = Math.min(maxAmplitude, segmentLength / 6);
-
-      // ความกว้าง zigzag (แบ่งเหลือจากเส้นตรงเริ่ม-จบ)
-      const zigzagWidth = segmentLength - 2 * straightLength;
-      const ampX = zigzagWidth / 6; // 3 peaks (ขึ้น-ลง-ขึ้น)
-      const ampY = ampX; // 45°
-
-      // จุด zigzag
-      const p1 = x0 + straightLength + 10;
-      const peakX = p1 + ampX;
-      const p2 = peakX + ampX;
-      const troughX = p2 + ampX;
-      const p3 = troughX + ampX;
-      const finalX = x1 - straightLength - 10;
-
-      const peakY = baseY - ampY;
-      const troughY = baseY + ampY;
-
-      // วาด path
-      d += ` L ${p1} ${baseY}`;        // เส้นตรงเริ่ม
-      d += ` L ${peakX} ${peakY}`;     // ขึ้นเฉียง
-      d += ` L ${p2} ${baseY}`;        // กลาง
-      d += ` L ${troughX} ${troughY}`; // ลงเฉียง
-      d += ` L ${p3} ${baseY}`;        // กลาง
-      d += ` L ${finalX} ${baseY}`;    // เส้นตรงสุดท้าย
-      d += ` L ${x1} ${baseY}`;        // ปิด segment
-    }
-
-    return d;
-  }, [points, centerY, gap]);
-
-  // Find the last payment point
-  const lastPaymentPoint = points.find(p => p.lastPayment);
+  const rotateInterpolate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
-    <View style={[styles.container, { width }]}>
-      <Svg width={width} height={height}>
-        {/* Main Title */}
-        <SvgText
-          x={width / 2}
-          y={25}
-          fontSize={16}
-          fontWeight="600"
-          textAnchor="middle"
-          fill="#333"
-        >
-          {textContent.coverage}
-        </SvgText>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#667eea" />
+      <View style={styles.container}>
+        {/* Background gradient effect */}
+        <View style={styles.backgroundGradient} />
 
-        {/* Subtitle */}
-        <SvgText
-          x={width / 2}
-          y={42}
-          fontSize={14}
-          textAnchor="middle"
-          fill="#666"
-        >
-          {textContent.or}
-        </SvgText>
-
-        {/* Mixed path: straight lines + zigzag */}
-        <Path
-          d={pathD}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        {/* Data points and labels */}
-        <G>
-          {points.map((p) => (
-            <G key={p.id}>
-              {/* Data point circle */}
-              <Circle
-                cx={p.x}
-                cy={p.y}
-                r={dotRadius}
-                fill={dotFill}
-                stroke={color}
-                strokeWidth={2}
-              />
-
-              {/* Clickable area */}
-              <Circle
-                cx={p.x}
-                cy={p.y}
-                r={dotRadius * 2}
-                fill="transparent"
-                onPress={() => setActiveId((cur) => (cur === p.id ? null : p.id))}
-              />
-
-              {/* Year labels below points */}
-              <SvgText
-                x={p.x}
-                y={p.year?.includes('A') ? p.y + 40 : p.y + 25}
-                fontSize={smallFont}
-                textAnchor="middle"
-                fill="#333"
-              >
-                {p.year?.replace('A', '')}
-              </SvgText>
-
-              {/* Age labels for major points */}
-              {p.year?.includes('A') && (
-                <SvgText
-                  x={p.x}
-                  y={p.y + 25}
-                  fontSize={smallFont - 2}
-                  textAnchor="middle"
-                  fill="#333"
-                >
-                  {textContent.atAge}
-                </SvgText>
-              )}
-
-              {/* Notes for major points */}
-              {p.major && (
-                <SvgText
-                  x={p.x}
-                  y={p.y - 30}
-                  fontSize={smallFont}
-                  textAnchor="middle"
-                  fill="#333"
-                />
-              )}
-
-              {/* Amount labels for points with level */}
-              {p.level !== undefined && p.level >= 0 && p.amountLabel && (
-                <SvgText
-                  x={p.x}
-                  y={p.y - 40 - (p.level * 20)}
-                  fontSize={smallFont}
-                  fontWeight="700"
-                  textAnchor="middle"
-                  fill="#333"
-                >
-                  {p.amountLabel}
-                </SvgText>
-              )}
-
-              {/* Tooltip on click */}
-              {activeId === p.id && p.value && (
-                <G>
-                  <Rect
-                    x={p.x - 40}
-                    y={p.y - 50}
-                    rx={6}
-                    ry={6}
-                    width={80}
-                    height={30}
-                    fill="#ffffff"
-                    stroke={color}
-                    strokeWidth={1}
-                    opacity={0.98}
-                  />
-                  <SvgText
-                    x={p.x}
-                    y={p.y - 32}
-                    fontSize={smallFont}
-                    fontWeight="700"
-                    textAnchor="middle"
-                    fill="#333"
-                  >
-                    {p.value}
-                  </SvgText>
-                </G>
-              )}
-            </G>
+        {/* Floating particles */}
+        <View style={styles.particlesContainer}>
+          {[...Array(20)].map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.particle,
+                {
+                  left: Math.random() * width,
+                  top: Math.random() * height,
+                  animationDelay: `${Math.random() * 3}s`,
+                },
+              ]}
+            />
           ))}
-        </G>
+        </View>
 
-        {/* Y-axis label */}
-        <SvgText
-          x={15}
-          y={centerY}
-          fontSize={fontSize}
-          fontWeight="600"
-          transform={`rotate(-90 15 ${centerY})`}
-          textAnchor="middle"
-          fill="#333"
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim },
+              ],
+            },
+          ]}
         >
-          {textContent.xAxisLabel}
-        </SvgText>
+          {/* Animated star icon */}
+          <Animated.View
+            style={[
+              styles.iconContainer,
+              {
+                transform: [{ rotate: rotateInterpolate }],
+              },
+            ]}
+          >
+            <Text style={styles.starIcon}>⭐</Text>
+          </Animated.View>
 
-        {/* Arrow and final value for last point */}
-        {lastPaymentPoint && lastPaymentPoint.value && (
-          <G>
-            {/* Vertical arrow line */}
-            <Line
-              x1={lastPaymentPoint.x}
-              y1={60}
-              x2={lastPaymentPoint.x}
-              y2={lastPaymentPoint.y - 20}
-              stroke={color}
-              strokeWidth={3}
-            />
+          {/* Title */}
+          <Text style={styles.title} >React Native</Text>
+          <Text style={styles.title}>Simple react native svg</Text>
 
-            {/* Arrow head pointing down to the point */}
-            <Polygon
-              points={`${lastPaymentPoint.x - 6},${lastPaymentPoint.y - 23} ${lastPaymentPoint.x + 6},${lastPaymentPoint.y - 23} ${lastPaymentPoint.x},${lastPaymentPoint.y - 15}`}
-              fill={"#1b1b1bff"}
-            />
+          {/* Creator info */}
+          <View style={styles.creatorContainer}>
+            <Text style={styles.createdBy}>Created by</Text>
+            <Text style={styles.creatorName}>Zermoser</Text>
+          </View>
 
-            {/* Value above arrow */}
-            <SvgText
-              x={lastPaymentPoint.x}
-              y={52}
-              fontSize={16}
-              fontWeight="700"
-              textAnchor="middle"
-              fill="#333"
+          {/* GitHub button */}
+          <Animated.View
+            style={[
+              styles.githubButtonContainer,
+              {
+                transform: [{ scale: pulseAnim }],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.githubButton}
+              onPress={handleGitHubPress}
+              activeOpacity={0.8}
             >
-              {lastPaymentPoint.value}
-            </SvgText>
+              <View style={styles.githubIconContainer}>
+                <Text style={styles.githubIcon}>❤️</Text>
+              </View>
+              <View style={styles.githubTextContainer}>
+                <Text style={styles.githubButtonText}>Visit GitHub</Text>
+                <Text style={styles.githubUsername}>@zermoser</Text>
+              </View>
+              <Text style={styles.arrowIcon}>→</Text>
+            </TouchableOpacity>
+          </Animated.View>
 
-            {/* Label below the last point */}
-            <SvgText
-              x={lastPaymentPoint.x}
-              y={lastPaymentPoint.y + 60}
-              fontSize={smallFont}
-              textAnchor="middle"
-              fill="#333"
-            >
-              {textContent.premiumEnd}
-            </SvgText>
-          </G>
-        )}
+            <View>
+              <WebView
+                source={{
+                  html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8"/>
+            <style>
+              body { margin:0; padding:0; background:#fff; }
+            </style>
+          </head>
+          <body>
+            <div>
+              ${mockSvg}
+            </div>
+          </body>
+        </html>
+      `,
+                }}
+                style={{ width: width }}
+              />
+            </View>
 
-        {/* Left arrow indicator */}
-        <G>
-          <Line x1={60} y1={80} x2={150} y2={80} stroke={color} strokeWidth={3} />
-          <Polygon points="50,80 65,75 65,85" fill={"#1b1b1bff"} />
-        </G>
 
-        {/* Right arrow indicator */}
-        <G>
-          <Line x1={width - 150} y1={80} x2={width - 60} y2={80} stroke={color} strokeWidth={3} />
-          <Polygon points={`${width - 50},80 ${width - 65},75 ${width - 65},85`} fill={"#1b1b1bff"} />
-        </G>
-      </Svg>
-    </View>
+          {/* Additional info */}
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoText}>
+              Thank you for using this Todo List App!
+            </Text>
+            <Text style={styles.versionText}>Version 1.0.0</Text>
+          </View>
+
+        </Animated.View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "center",
-    padding: 8,
-    backgroundColor: '#f8f9fa',
+    flex: 1,
+    backgroundColor: "#667eea",
+    position: "relative",
+  },
+  backgroundGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#667eea",
+    opacity: 0.9,
+  },
+  particlesContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  particle: {
+    position: "absolute",
+    width: 4,
+    height: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 2,
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 60,
+  },
+  iconContainer: {
+    marginBottom: 32,
+  },
+  starIcon: {
+    fontSize: 80,
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  creatorContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+    marginTop: 20
+  },
+  createdBy: {
+    fontSize: 18,
+    color: "rgba(255, 255, 255, 0.9)",
+    marginBottom: 8,
+    fontWeight: "300",
+  },
+  creatorName: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  githubButtonContainer: {
+    marginBottom: 40,
+  },
+  githubButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2d3748",
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    minWidth: 250,
+  },
+  githubIconContainer: {
+    marginRight: 16,
+  },
+  githubIcon: {
+    fontSize: 32,
+  },
+  githubTextContainer: {
+    flex: 1,
+  },
+  githubButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#ffffff",
+    marginBottom: 2,
+  },
+  githubUsername: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    fontWeight: "400",
+  },
+  arrowIcon: {
+    fontSize: 20,
+    color: "#ffffff",
+    marginLeft: 12,
+  },
+  infoContainer: {
+    alignItems: "center",
+  },
+  infoText: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+    marginBottom: 8,
+    fontWeight: "400",
+  },
+  versionText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
+    fontWeight: "300",
   },
 });
