@@ -41,6 +41,13 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="webview"
+                options={{
+                    title: 'Webview Test',
+                    tabBarIcon: getIcon('person.fill', 'person'),
+                }}
+            />
+            <Tabs.Screen
                 name="credit"
                 options={{
                     title: 'Credit',
